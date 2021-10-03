@@ -18,6 +18,10 @@ pipeline {
     stage('UI Test') {
       parallel {
         stage('UI Test') {
+          agent any
+          environment {
+            customWorkspace = 'workspace/UIAutomation'
+          }
           steps {
             git(url: 'https://github.com/Haja49/WebAppUI.git', branch: 'master')
             sleep 10
@@ -26,6 +30,10 @@ pipeline {
         }
 
         stage('API Test') {
+          agent any
+          environment {
+            customWorkspace = 'workspace/APIAutomation'
+          }
           steps {
             git(url: 'https://github.com/Haja49/WebAPI.git', branch: 'master')
             sleep 10
