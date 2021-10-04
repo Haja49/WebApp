@@ -1,13 +1,13 @@
 pipeline {
   agent any
   stages {
-    stage('Dev Clone') {
+    stage('dev-git-clone') {
       steps {
-        git(url: 'https://github.com/Haja49/WebApp.git', branch: 'master')
+        git 'https://github.com/TestLeafInc/WebApp.git'
       }
     }
 
-    stage('Dev Build') {
+    stage('dev-build') {
       steps {
         bat 'start /min StopApp.bat'
         bat 'mvn clean install'
@@ -15,46 +15,75 @@ pipeline {
       }
     }
 
-    stage('UI Test') {
+    stage('tests') {
       parallel {
-        stage('UI Test') {
+        stage('qa-git-clone-test') {
           agent any
-          environment {
-            customWorkspace = 'workspace/UIAutomation'
-          }
           steps {
-            git(url: 'https://github.com/Haja49/WebAppUI.git', branch: 'master')
-            sleep 10
-            bat 'mvn test'
+            git 'https://github.com/TestLeafInc/WebAppApiAutomation'
+            script {
+              try {
+                sleep(time:10, unit:'SECONDS')
+                bat 'mvn test'
+              } catch (Exception e){
+                echo 'API Failed'
+                currentBuild.result='UNSTABLE'
+              }
+            }
+
           }
         }
 
-        stage('API Test') {
+        stage('qa-api-git-clone-test') {
           agent any
-          environment {
-            customWorkspace = 'workspace/APIAutomation'
-          }
           steps {
-            git(url: 'https://github.com/Haja49/WebAPI.git', branch: 'master')
-            sleep 10
-            bat 'mvn test'
+            git 'https://github.com/TestLeafInc/WebAppUiAutomation'
+            sleep(time: 10, unit: 'SECONDS')
+            retry(count: 2) {
+              bat 'mvn test'
+            }
+
           }
         }
 
       }
     }
 
-    stage('UAT Certification') {
-      steps {
-        input 'Do you want to Deploy in Prod?'
-      }
+  }
+  tools {
+    maven 'MAVEN_HOME'
+  }
+  post {
+    always {
+      echo 'Always'
     }
 
-    stage('Prod Deploy') {
-      steps {
-        echo 'Deployed to Prod'
-      }
+    success {
+      echo 'Success'
     }
 
+    failure {
+      echo 'failure'
+    }
+
+    unstable {
+      echo 'unstable'
+    }
+
+    changed {
+      echo 'chnaged'
+    }
+
+    regression {
+      echo 'regression'
+    }
+
+    unsuccessful {
+      echo 'unsuccessful'
+    }
+
+  }
+  triggers {
+    cron('50 14 * * 0')
   }
 }
