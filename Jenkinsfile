@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('dev-git-clone') {
       steps {
-        git 'https://github.com/TestLeafInc/WebApp.git'
+        git 'https://github.com/Haja49/WebApp'
       }
     }
 
@@ -20,7 +20,7 @@ pipeline {
         stage('qa-git-clone-test') {
           agent any
           steps {
-            git 'https://github.com/TestLeafInc/WebAppApiAutomation'
+            git 'https://github.com/Haja49/WebAPI'
             script {
               try {
                 sleep(time:10, unit:'SECONDS')
@@ -37,7 +37,7 @@ pipeline {
         stage('qa-api-git-clone-test') {
           agent any
           steps {
-            git 'https://github.com/TestLeafInc/WebAppUiAutomation'
+            git 'https://github.com/Haja49/WebAppUI'
             sleep(time: 10, unit: 'SECONDS')
             retry(count: 2) {
               bat 'mvn test'
